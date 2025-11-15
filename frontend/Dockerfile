@@ -2,22 +2,23 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY frontend/package*.json ./
+# Copy only frontend package management files
+COPY frontend/package*.json ./ 
 
 # Install dependencies
 RUN npm install
 
-# Copy source code
-COPY . .
+# Copy actual frontend source
+COPY ../frontend
+
 # Build the app
 RUN npm run build
 
-# Install serve to run the production build
+# Install serve to run production
 RUN npm install -g serve
 
 # Expose port
 EXPOSE 3000
 
-# Start the app
+# Run production build
 CMD ["serve", "-s", "build", "-l", "3000"]
