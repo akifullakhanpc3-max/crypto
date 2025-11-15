@@ -1,24 +1,24 @@
+# Use Node 18 Alpine
 FROM node:18-alpine
 
-WORKDIR /app
+# Set working directory to your frontend
+WORKDIR /app/frontend
 
-# Copy only frontend package management files
-COPY frontend/package*.json ./ 
-
-# Install dependencies
+# Copy package.json & package-lock.json and install dependencies
+COPY frontend/package*.json ./
 RUN npm install
 
-# Copy actual frontend source
-COPY . ./frontend
+# Copy the rest of the frontend code
+COPY frontend/. ./
 
-# Build the app
+# Build React app
 RUN npm run build
 
-# Install serve to run production
+# Install serve to run the production build
 RUN npm install -g serve
 
 # Expose port
 EXPOSE 3000
 
-# Run production build
+# Start the app
 CMD ["serve", "-s", "build", "-l", "3000"]
