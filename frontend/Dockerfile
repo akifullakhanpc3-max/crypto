@@ -2,15 +2,14 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files from frontend folder
+# Copy package files
 COPY frontend/package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy frontend source code
-COPY frontend/. .
-
+# Copy source code
+COPY . .
 # Build the app
 RUN npm run build
 
