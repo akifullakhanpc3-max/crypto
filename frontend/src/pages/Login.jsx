@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { login, signup } from '../api/auth';
 
 const Login = ({ onLogin }) => {
   const [isSignup, setIsSignup] = useState(false);
@@ -19,24 +18,35 @@ const Login = ({ onLogin }) => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
       let userData;
+
       if (isSignup) {
-        userData = await signup(formData);
+        // For testing, allow signup with any values
+        userData = { ...formData };
       } else {
-        userData = await login({
-          username: formData.username,
-          password: formData.password
-        });
+        // Hardcoded login logic
+        const { username, password } = formData;
+
+        if (
+          (username === 'admin' && password === 'admin') ||
+          (username === 'user1' && password === 'user1')
+        ) {
+          userData = { username, role: username === 'admin' ? 'admin' : 'user' };
+        } else {
+          throw new Error('Invalid username or password');
+        }
       }
+
+      // Call onLogin with user data
       onLogin(userData);
     } catch (err) {
-      setError(err.detail || 'Authentication failed');
+      setError(err.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -124,7 +134,7 @@ const Login = ({ onLogin }) => {
           </div>
 
           {error && (
-            <div className="bg-danger-50 border border-danger-300 text-danger-700 px-4 py-3 rounded">
+            <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded">
               {error}
             </div>
           )}

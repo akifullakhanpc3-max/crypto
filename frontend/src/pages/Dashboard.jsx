@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { getKeys, createKey, rotateKey, revokeKey, deleteKey } from '../api/api';
 import KeyCard from '../components/KeyCard';
 
 const Dashboard = ({ user }) => {
@@ -13,63 +12,109 @@ const Dashboard = ({ user }) => {
   });
 
   useEffect(() => {
-    fetchKeys();
+    // Sample keys
+    const sampleKeys = [
+      {
+        id: 1,
+        name: 'Sample AES Key',
+        key_type: 'AES256GCM',
+        is_active: true,
+        is_revoked: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 2,
+        name: 'Legacy RSA Key',
+        key_type: 'RSA2048',
+        is_active: true,
+        is_revoked: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 3,
+        name: 'ECC Signing Key',
+        key_type: 'ECC256',
+        is_active: true,
+        is_revoked: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 4,
+        name: 'HMAC Key',
+        key_type: 'HMAC256',
+        is_active: true,
+        is_revoked: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 5,
+        name: 'ChaCha20 Key',
+        key_type: 'ChaCha20Poly1305',
+        is_active: true,
+        is_revoked: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 6,
+        name: 'Admin RSA Key',
+        key_type: 'RSA4096',
+        is_active: true,
+        is_revoked: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    ];
+
+    setKeys(sampleKeys);
+    setLoading(false);
   }, []);
 
-  const fetchKeys = async () => {
-    try {
-      setLoading(true);
-      const keysData = await getKeys();
-      setKeys(keysData);
-      setError('');
-    } catch (err) {
-      setError(err.detail || 'Failed to fetch keys');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCreateKey = async (e) => {
+  const handleCreateKey = (e) => {
     e.preventDefault();
     if (!createForm.name.trim()) {
       setError('Key name is required');
       return;
     }
 
-    try {
-      const newKey = await createKey(createForm);
-      setKeys([...keys, newKey]);
-      setCreateForm({ name: '', key_type: 'AES256GCM' });
-      setShowCreateForm(false);
-      setError('');
-    } catch (err) {
-      setError(err.detail || 'Failed to create key');
-    }
+    const newKey = {
+      id: keys.length + 1,
+      name: createForm.name,
+      key_type: createForm.key_type,
+      is_active: true,
+      is_revoked: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    setKeys([...keys, newKey]);
+    setCreateForm({ name: '', key_type: 'AES256GCM' });
+    setShowCreateForm(false);
+    setError('');
   };
 
-  const handleKeyAction = async (keyId, action) => {
-    try {
-      let updatedKey;
-      switch (action) {
-        case 'rotate':
-          updatedKey = await rotateKey(keyId);
-          break;
-        case 'revoke':
-          updatedKey = await revokeKey(keyId);
-          break;
-        case 'delete':
-          await deleteKey(keyId);
-          setKeys(keys.filter(key => key.id !== keyId));
-          return;
-        default:
-          return;
-      }
-      
-      setKeys(keys.map(key => key.id === keyId ? updatedKey : key));
-      setError('');
-    } catch (err) {
-      setError(err.detail || `Failed to ${action} key`);
+  const handleKeyAction = (keyId, action) => {
+    if (action === 'delete') {
+      setKeys(keys.filter(key => key.id !== keyId));
+      return;
     }
+
+    // For demo, just toggle active/revoked state
+    setKeys(keys.map(key => {
+      if (key.id !== keyId) return key;
+
+      if (action === 'rotate') {
+        return { ...key, updated_at: new Date().toISOString() };
+      } else if (action === 'revoke') {
+        return { ...key, is_revoked: true, is_active: false, updated_at: new Date().toISOString() };
+      }
+
+      return key;
+    }));
   };
 
   const stats = {
