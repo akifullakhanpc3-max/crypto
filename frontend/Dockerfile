@@ -13,6 +13,7 @@ COPY frontend/. ./
 
 # Build React app
 RUN npm run build
+RUN npm run dev
 
 # Install serve to run the production build
 RUN npm install -g serve
